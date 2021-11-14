@@ -1,11 +1,14 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
 import HomePage from './pages/hompage.component';
 
 function App() {
   return (
     <div>
-      <HomePage />
+      <Routes>
+        <Route path='/' element={<HomePage />} />
+      </Routes>
     </div>
   );
 }
