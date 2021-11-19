@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+// connect is the highest order of components in react
+import { connect } from 'react-redux';
+
 import { auth } from '../../firebase/firebase.utils';
 import './header.styles.scss';
 import { ReactComponent as Logo } from '../../assets/crown.svg';
 
-const Header = ({ currentUser }) => (
+const Header = (props) => (
   <div className='header'>
     <Link to='/' className='logo-container'>
       <Logo className='logo' />
@@ -16,7 +19,7 @@ const Header = ({ currentUser }) => (
       <Link className='option' to='/shop'>
         CONTACT
       </Link>
-      {currentUser ? (
+      {props ? (
         <div className='option' onClick={() => auth.signOut()}>
           SIGN OUT
         </div>
@@ -29,4 +32,10 @@ const Header = ({ currentUser }) => (
   </div>
 );
 
-export default Header;
+// mapStateToProps can be any naming but it is the standard for redux codebases
+const mapStateToProps = (state) => ({
+  currentUser: state.user.currentUser,
+});
+
+export default connect(mapStateToProps)(Header);
+// export default Header;
