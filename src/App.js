@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import './App.css';
@@ -46,7 +47,7 @@ class App extends Component {
         <Header />
         <Routes>
           <Route path='/' element={<HomePage />} />
-          <Route path='/shop' element={<ShopPage />} />
+          <Route path='shop/*' element={<ShopPage />} />
           <Route path='/checkout' element={<CheckOutPage />} />
           <Route
             exact
