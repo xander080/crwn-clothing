@@ -1,62 +1,62 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { createStructuredSelector } from 'reselect';
+import {
+  selectIsCollectionFetching,
+  selectIsCollectionsLoaded,
+} from '../../redux/shop/shop.selectors';
 import { connect } from 'react-redux';
 
 import CollectionsOverview from '../../components/collections-overview/collections-overview.component';
 import CollectionPage from '../collection/collection.component';
-import { updateCollections } from '../../redux/shop/shop.actions';
+import { fetchCollectionsStartAsync } from '../../redux/shop/shop.actions';
 import WithSpinner from '../../components/with-spinner/with-spinner.component';
-
-import {
-  firestore,
-  convertCollectionsSnapshotToMap,
-} from '../../firebase/firebase.utils';
 
 const CollectionsOverviewWithSpinner = WithSpinner(CollectionsOverview);
 const CollectionPageWithSpinner = WithSpinner(CollectionPage);
 
 class ShopPage extends React.Component {
-  state = {
-    loading: true,
-  };
-
-  unsubscribeFromSnapshot = null;
-
   componentDidMount() {
-    const { updateCollections } = this.props;
-    const collectionRef = firestore.collection('collections');
-
+    // const { updateCollections } = this.props;
+    // const collectionRef = firestore.collection('collections');
     //observable pattern if using firebase using snapshot this do live update
     // collectionRef.onSnapshot((snapshot) => {
     //   const collectionsMap = convertCollectionsSnapshotToMap(snapshot);
     //   updateCollections(collectionsMap);
     //   this.setState({ loading: false });
     // });
-
     // if not using firebase we use promise based pattern
     // 1st way - negative is:  the only time the new data is when we remount our shop, unlike snapshot it is liveupdate
-    collectionRef.get().then((snapshot) => {
-      const collectionsMap = convertCollectionsSnapshotToMap(snapshot);
-      updateCollections(collectionsMap);
-      this.setState({ loading: false });
-    });
-
+    // collectionRef.get().then((snapshot) => {
+    //   const collectionsMap = convertCollectionsSnapshotToMap(snapshot);
+    //   updateCollections(collectionsMap);
+    //   this.setState({ loading: false });
+    // });
     // 2nd way its not good if using firebase it will be nested
     // fetch('https://firestore.googleapis.com/v1/projects/crwn-db-b3187/databases/(default)/documents/collections').then(response => JSON.parse(response)).then(collections=>{console.log(collections);});
+    // since where putting the get Collection to our reducer new code will be done here
+    const { fetchCollectionsStartAsync } = this.props;
+    fetchCollectionsStartAsync();
   }
 
   render() {
-    const { loading } = this.state;
+    const { isCollectionFetching, isCollectionLoaded } = this.props;
     return (
       <div className='shope-page'>
         <Routes>
           <Route
             path='/'
-            element={<CollectionsOverviewWithSpinner isLoading={loading} />}
+            element={
+              <CollectionsOverviewWithSpinner
+                isLoading={isCollectionFetching}
+              />
+            }
           />
           <Route
             path='/:collectionId'
-            element={<CollectionPageWithSpinner isLoading={loading} />}
+            element={
+              <CollectionPageWithSpinner isLoading={!isCollectionLoaded} />
+            }
           />
         </Routes>
       </div>
@@ -64,8 +64,12 @@ class ShopPage extends React.Component {
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  updateCollections: (collectionsMap) =>
-    dispatch(updateCollections(collectionsMap)),
+const mapStateToProps = createStructuredSelector({
+  isCollectionFetching: selectIsCollectionFetching,
+  isCollectionLoaded: selectIsCollectionsLoaded,
 });
-export default connect(null, mapDispatchToProps)(ShopPage);
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchCollectionsStartAsync: () => dispatch(fetchCollectionsStartAsync()),
+});
+export default connect(mapStateToProps, mapDispatchToProps)(ShopPage);
