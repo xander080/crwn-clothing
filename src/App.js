@@ -12,34 +12,15 @@ import CheckOutPage from './pages/checkout/checkout.component';
 
 import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 // firebase
-import { auth, createUserProfileDocument } from './firebase/firebase.utils';
-import { setCurrentUser } from './redux/user/user.action';
+import { checkUserSession } from './redux/user/user.action';
 import { selectCurrentUser } from './redux/user/user.selectors';
 
 class App extends Component {
   unsubscribeFromAuth = null;
 
   componentDidMount() {
-    const { setCurrentUser } = this.props;
-
-    //observable pattern if using firebase
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(
-      async (userAuth) => {
-        if (userAuth) {
-          const userRef = await createUserProfileDocument(userAuth);
-
-          userRef.onSnapshot((snapShot) => {
-            setCurrentUser({
-              id: snapShot.id,
-              ...snapShot.data(),
-            });
-          });
-        } else {
-          setCurrentUser(userAuth);
-        }
-      },
-      (error) => console.log(error)
-    );
+    const { checkUserSession } = this.props;
+    checkUserSession();
   }
 
   componentWillUnmount() {
@@ -70,19 +51,13 @@ class App extends Component {
     );
   }
 }
-// <Route
-//   path='/signin'
-//   render={() =>
-//     this.props.currentUser ? <Navigate to='/' /> : <SignInAndSignUpPage />
-//   }
-// />;
-// <Route exact path='/signin' element={<SignInAndSignUpPage />} />
+
 const mapStateToProps = createStructuredSelector({
   currentUser: selectCurrentUser,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  setCurrentUser: (user) => dispatch(setCurrentUser(user)),
+  checkUserSession: () => dispatch(checkUserSession()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
