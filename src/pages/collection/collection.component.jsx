@@ -10,8 +10,7 @@ import './collection.styles.scss';
 
 const CollectionPage = () => {
   const { collectionId } = useParams();
-  const st = useSelector((state) => state);
-  const collection = selectCollection(collectionId)(st);
+  const collection = useSelector(selectCollection(collectionId));
   const { title, items } = collection;
 
   return (
